@@ -6,6 +6,7 @@ type InstantNoodle {
   name: String
   brand: String
   spicinessLevel: Int
+  reviewsCount: Int
   originCountry: InstantNoodleOriginCountryType
   rating: Int
   imageURL: String
@@ -40,6 +41,7 @@ input InstantNoodleWhereInput {
   name: StringFilter
   brand: StringFilter
   spicinessLevel: IntFilter
+  reviewsCount: IntFilter
   originCountry: InstantNoodleOriginCountryTypeNullableFilter
   rating: IntFilter
   imageURL: StringFilter
@@ -120,6 +122,7 @@ input InstantNoodleOrderByInput {
   name: OrderDirection
   brand: OrderDirection
   spicinessLevel: OrderDirection
+  reviewsCount: OrderDirection
   originCountry: OrderDirection
   rating: OrderDirection
   imageURL: OrderDirection
@@ -135,6 +138,7 @@ input InstantNoodleUpdateInput {
   name: String
   brand: String
   spicinessLevel: Int
+  reviewsCount: Int
   originCountry: InstantNoodleOriginCountryType
   rating: Int
   imageURL: String
@@ -157,6 +161,7 @@ input InstantNoodleCreateInput {
   name: String
   brand: String
   spicinessLevel: Int
+  reviewsCount: Int
   originCountry: InstantNoodleOriginCountryType
   rating: Int
   imageURL: String

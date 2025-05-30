@@ -27,6 +27,14 @@ export const lists = {
         defaultValue: 3,
         ui: { description: 'Scale of 1 (mild) to 5 (🔥)' },
       }),
+      reviewsCount: integer({
+        validation: {
+          isRequired: true,
+          min: 0,
+        },
+        defaultValue: 0,
+        ui: { description: 'Number of reviews for this noodle' },
+      }),
       originCountry: select({
         type: 'enum',
         options: [

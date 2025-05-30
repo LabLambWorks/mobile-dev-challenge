@@ -31,6 +31,7 @@ export async function seedNoodleData(context: Context) {
         originCountry: item.originCountry as InstantNoodleOriginCountryType,
         rating: item.rating,
         imageURL: noodleImageUrls[i],
+        reviewsCount: 0,
         category: { connect: { id: category.id } },
       },
     });
