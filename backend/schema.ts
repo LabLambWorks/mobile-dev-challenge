@@ -1,4 +1,3 @@
-// schema.ts - Task 2: Add spicinessDescription virtual field
 import { graphql, list } from '@keystone-6/core';
 import {
   text,
