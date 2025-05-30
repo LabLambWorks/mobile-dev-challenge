@@ -18,6 +18,7 @@ model InstantNoodle {
   spicinessLevel Int       @default(3)
   originCountry  String
   rating         Int       @default(5)
+  reviewsCount   Int?      @default(0)
   imageURL       String    @default("")
   category       Category? @relation("InstantNoodle_category", fields: [categoryId], references: [id])
   categoryId     String?   @map("category")
