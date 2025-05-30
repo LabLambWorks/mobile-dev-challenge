@@ -1,3 +1,4 @@
+// schema.ts - Task 1: Add reviewsCount field
 import { graphql, list } from '@keystone-6/core';
 import {
   text,
@@ -52,6 +53,16 @@ export const lists = {
         defaultValue: 5,
         ui: { description: 'Your personal rating (1–10)' },
       }),
+      // 🆕 TASK 1: Add reviewsCount field
+      reviewsCount: integer({
+        validation: {
+          isRequired: true,
+          min: 0,
+        },
+        defaultValue: 0,
+        ui: { description: 'Number of reviews for this noodle' },
+      }),
+      // End of Task 1 addition
       imageURL: text({
         validation: { isRequired: false },
         ui: { description: 'URL to the noodle image' },
@@ -66,7 +77,6 @@ export const lists = {
       }),
     },
   }),
-
   Category: list({
     access: allowAll,
     fields: {
