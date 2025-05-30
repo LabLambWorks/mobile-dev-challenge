@@ -9,6 +9,8 @@ import {
   Pressable,
 } from "react-native";
 import { gql, useQuery, useMutation } from "@apollo/client";
+import { useFavoritesStore } from "../store/favorites";
+import { Ionicons } from "@expo/vector-icons";
 
 const GET_NOODLE_DETAILS = gql`
   query GetNoodleDetails($id: ID!) {
@@ -42,6 +44,7 @@ const UPDATE_REVIEW_COUNT = gql`
 
 export default function NoodlesDetails() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { isFavorite, addFavorite, removeFavorite } = useFavoritesStore();
   const { loading, error, data } = useQuery(GET_NOODLE_DETAILS, {
     variables: { id },
     skip: !id,
@@ -99,10 +102,27 @@ export default function NoodlesDetails() {
   }
 
   const noodle = data.instantNoodle;
+  const favorite = isFavorite(id);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Stack.Screen options={{ title: noodle.name }} />
+      <Stack.Screen 
+        options={{ 
+          title: noodle.name,
+          headerRight: () => (
+            <Pressable 
+              onPress={() => favorite ? removeFavorite(id) : addFavorite(id)}
+              style={styles.favoriteButton}
+            >
+              <Ionicons 
+                name={favorite ? "heart" : "heart-outline"} 
+                size={24} 
+                color={favorite ? "#FF4B3E" : "#000"} 
+              />
+            </Pressable>
+          ),
+        }} 
+      />
 
       {noodle.imageURL && (
         <Image
@@ -123,9 +143,11 @@ export default function NoodlesDetails() {
         <Text style={styles.tag}>📝 {noodle.reviewsCount || 0} reviews</Text>
       </View>
 
-      <Pressable style={styles.reviewButton} onPress={handleLeaveReview}>
-        <Text style={styles.reviewButtonText}>Leave Review</Text>
-      </Pressable>
+      <View style={styles.buttonContainer}>
+        <Pressable style={styles.reviewButton} onPress={handleLeaveReview}>
+          <Text style={styles.reviewButtonText}>Leave Review</Text>
+        </Pressable>
+      </View>
     </ScrollView>
   );
 }
@@ -192,5 +214,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     letterSpacing: 0.5,
+  },
+  buttonContainer: {
+    marginTop: 32,
+    alignItems: "center",
+  },
+  favoriteButton: {
+    padding: 8,
+    marginRight: 8,
   },
 });

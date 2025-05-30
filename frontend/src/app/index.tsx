@@ -11,7 +11,7 @@ import { useQuery } from "@apollo/client";
 import { GET_NOODLES } from "./queries";
 import { NoodleItem } from "./components/NoodleItem";
 import { NoodleFilters } from "./components/NoodleFilters";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
 type Noodle = {
@@ -23,6 +23,7 @@ type Noodle = {
 };
 
 export default function NoodleListScreen() {
+  const router = useRouter();
   const [spicinessLevel, setSpicinessLevel] = useState<number | null>(null);
   const [originCountry, setOriginCountry] = useState<string | null>(null);
   const [isFiltersVisible, setIsFiltersVisible] = useState(false);
@@ -58,12 +59,19 @@ export default function NoodleListScreen() {
         options={{
           headerTitle: "Noodles",
           headerRight: () => (
-            <Pressable onPress={openFilters}>
-              <Ionicons name="filter-outline" size={24} color="#000" />
-              <View style={styles.filterBadge}>
-                <Text style={styles.filterBadgeText}>{activeFiltersCount}</Text>
-              </View>
-            </Pressable>
+            <View style={styles.headerButtons}>
+              <Pressable onPress={() => router.push("/favourites")} style={styles.headerButton}>
+                <Ionicons name="heart-outline" size={24} color="#000" />
+              </Pressable>
+              <Pressable onPress={openFilters} style={styles.headerButton}>
+                <Ionicons name="filter-outline" size={24} color="#000" />
+                {activeFiltersCount > 0 && (
+                  <View style={styles.filterBadge}>
+                    <Text style={styles.filterBadgeText}>{activeFiltersCount}</Text>
+                  </View>
+                )}
+              </Pressable>
+            </View>
           ),
         }}
       />
@@ -123,5 +131,14 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 10,
     fontWeight: "bold",
+  },
+  headerButtons: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  headerButton: {
+    padding: 8,
+    marginLeft: 8,
+    position: "relative",
   },
 });
