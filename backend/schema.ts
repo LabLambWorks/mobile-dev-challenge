@@ -8,6 +8,11 @@ import {
   virtual,
 } from '@keystone-6/core/fields';
 import { allowAll } from '@keystone-6/core/access';
+import { BaseListTypeInfo } from '@keystone-6/core/types';
+
+interface InstantNoodleItem extends BaseListTypeInfo {
+  reviewsCount: number;
+}
 
 export const lists = {
   InstantNoodle: list({
@@ -46,6 +51,35 @@ export const lists = {
         },
         defaultValue: 0,
         ui: { description: 'Number of reviews for this noodle' },
+        hooks: {
+          validateInput: ({ resolvedData, item, addValidationError }) => {
+            if (item && typeof resolvedData.reviewsCount === 'number') {
+              const currentCount = (item as unknown as InstantNoodleItem)
+                .reviewsCount;
+              if (resolvedData.reviewsCount < currentCount) {
+                addValidationError('reviewsCount cannot be decreased');
+              }
+            }
+          },
+          async resolveInput({ operation, resolvedData, item }) {
+            // Update lastReviewedAt when reviewsCount increases
+            if (
+              operation === 'update' &&
+              item &&
+              typeof resolvedData.reviewsCount === 'number'
+            ) {
+              const currentCount = (item as unknown as InstantNoodleItem)
+                .reviewsCount;
+              if (resolvedData.reviewsCount > currentCount) {
+                resolvedData.lastReviewedAt = new Date().toISOString();
+              }
+            }
+            return resolvedData.reviewsCount;
+          },
+        },
+      }),
+      lastReviewedAt: timestamp({
+        validation: { isRequired: false },
       }),
       originCountry: select({
         type: 'enum',

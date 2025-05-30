@@ -8,12 +8,15 @@ type InstantNoodle {
   spicinessLevel: Int
   spicinessDescription: String
   reviewsCount: Int
+  lastReviewedAt: DateTime
   originCountry: InstantNoodleOriginCountryType
   rating: Int
   imageURL: String
   category: Category
   createdAt: DateTime
 }
+
+scalar DateTime @specifiedBy(url: "https://datatracker.ietf.org/doc/html/rfc3339#section-5.6")
 
 enum InstantNoodleOriginCountryType {
   south_korea
@@ -28,8 +31,6 @@ enum InstantNoodleOriginCountryType {
   philippines
 }
 
-scalar DateTime @specifiedBy(url: "https://datatracker.ietf.org/doc/html/rfc3339#section-5.6")
-
 input InstantNoodleWhereUniqueInput {
   id: ID
 }
@@ -43,6 +44,7 @@ input InstantNoodleWhereInput {
   brand: StringFilter
   spicinessLevel: IntFilter
   reviewsCount: IntFilter
+  lastReviewedAt: DateTimeNullableFilter
   originCountry: InstantNoodleOriginCountryTypeNullableFilter
   rating: IntFilter
   imageURL: StringFilter
@@ -100,13 +102,6 @@ input IntFilter {
   not: IntFilter
 }
 
-input InstantNoodleOriginCountryTypeNullableFilter {
-  equals: InstantNoodleOriginCountryType
-  in: [InstantNoodleOriginCountryType!]
-  notIn: [InstantNoodleOriginCountryType!]
-  not: InstantNoodleOriginCountryTypeNullableFilter
-}
-
 input DateTimeNullableFilter {
   equals: DateTime
   in: [DateTime!]
@@ -118,12 +113,20 @@ input DateTimeNullableFilter {
   not: DateTimeNullableFilter
 }
 
+input InstantNoodleOriginCountryTypeNullableFilter {
+  equals: InstantNoodleOriginCountryType
+  in: [InstantNoodleOriginCountryType!]
+  notIn: [InstantNoodleOriginCountryType!]
+  not: InstantNoodleOriginCountryTypeNullableFilter
+}
+
 input InstantNoodleOrderByInput {
   id: OrderDirection
   name: OrderDirection
   brand: OrderDirection
   spicinessLevel: OrderDirection
   reviewsCount: OrderDirection
+  lastReviewedAt: OrderDirection
   originCountry: OrderDirection
   rating: OrderDirection
   imageURL: OrderDirection
@@ -140,6 +143,7 @@ input InstantNoodleUpdateInput {
   brand: String
   spicinessLevel: Int
   reviewsCount: Int
+  lastReviewedAt: DateTime
   originCountry: InstantNoodleOriginCountryType
   rating: Int
   imageURL: String
@@ -163,6 +167,7 @@ input InstantNoodleCreateInput {
   brand: String
   spicinessLevel: Int
   reviewsCount: Int
+  lastReviewedAt: DateTime
   originCountry: InstantNoodleOriginCountryType
   rating: Int
   imageURL: String

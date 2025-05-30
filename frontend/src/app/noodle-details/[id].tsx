@@ -6,8 +6,9 @@ import {
   Image,
   ScrollView,
   StyleSheet,
+  Pressable,
 } from "react-native";
-import { gql, useQuery } from "@apollo/client";
+import { gql, useQuery, useMutation } from "@apollo/client";
 
 const GET_NOODLE_DETAILS = gql`
   query GetNoodleDetails($id: ID!) {
@@ -18,10 +19,23 @@ const GET_NOODLE_DETAILS = gql`
       spicinessLevel
       originCountry
       rating
+      reviewsCount
       imageURL
       category {
         name
       }
+    }
+  }
+`;
+
+const UPDATE_REVIEW_COUNT = gql`
+  mutation UpdateReviewCount($id: ID!, $reviewsCount: Int!) {
+    updateInstantNoodle(
+      where: { id: $id }
+      data: { reviewsCount: $reviewsCount }
+    ) {
+      id
+      reviewsCount
     }
   }
 `;
@@ -32,6 +46,41 @@ export default function NoodlesDetails() {
     variables: { id },
     skip: !id,
   });
+
+  const [updateReviewCount] = useMutation(UPDATE_REVIEW_COUNT, {
+    update(cache, { data: mutationData }) {
+      const existingNoodle = cache.readQuery({
+        query: GET_NOODLE_DETAILS,
+        variables: { id },
+      });
+
+      if (existingNoodle) {
+        cache.writeQuery({
+          query: GET_NOODLE_DETAILS,
+          variables: { id },
+          data: {
+            instantNoodle: {
+              ...existingNoodle.instantNoodle,
+              reviewsCount: mutationData.updateInstantNoodle.reviewsCount,
+            },
+          },
+        });
+      }
+    },
+  });
+
+  const handleLeaveReview = async () => {
+    try {
+      await updateReviewCount({
+        variables: {
+          id,
+          reviewsCount: (data?.instantNoodle.reviewsCount || 0) + 1,
+        },
+      });
+    } catch (err) {
+      console.error("Failed to update review count:", err);
+    }
+  };
 
   if (loading) {
     return (
@@ -71,7 +120,12 @@ export default function NoodlesDetails() {
         <Text style={styles.tag}>🔥{"🔥".repeat(noodle.spicinessLevel)}</Text>
         <Text style={styles.tag}>⭐ {noodle.rating}/10</Text>
         <Text style={styles.tag}>📦 {noodle.category?.name}</Text>
+        <Text style={styles.tag}>📝 {noodle.reviewsCount || 0} reviews</Text>
       </View>
+
+      <Pressable style={styles.reviewButton} onPress={handleLeaveReview}>
+        <Text style={styles.reviewButtonText}>Leave Review</Text>
+      </Pressable>
     </ScrollView>
   );
 }
@@ -116,5 +170,27 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     marginRight: 8,
     marginBottom: 8,
+  },
+  reviewButton: {
+    backgroundColor: "#FF4B3E",
+    paddingVertical: 14,
+    paddingHorizontal: 28,
+    borderRadius: 25,
+    alignSelf: "center",
+    marginTop: 32,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  reviewButtonText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "700",
+    letterSpacing: 0.5,
   },
 });

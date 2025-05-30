@@ -17,6 +17,7 @@ model InstantNoodle {
   brand          String    @default("")
   spicinessLevel Int       @default(3)
   reviewsCount   Int       @default(0)
+  lastReviewedAt DateTime?
   originCountry  String
   rating         Int       @default(5)
   imageURL       String    @default("")
