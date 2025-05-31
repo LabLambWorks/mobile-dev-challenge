@@ -76,11 +76,6 @@ export const lists = {
         defaultValue: 0,
         ui: { description: 'Number of reviews for this noodle' },
       }),
-      // 🆕 TASK 3: Add lastReviewedAt field
-      lastReviewedAt: timestamp({
-        ui: { description: 'Last time this noodle was reviewed' },
-      }),
-      // End of Task 3 field addition
       imageURL: text({
         validation: { isRequired: false },
         ui: { description: 'URL to the noodle image' },

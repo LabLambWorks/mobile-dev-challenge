@@ -11,6 +11,8 @@ import {
 } from "react-native";
 import { gql, useQuery, useMutation } from "@apollo/client";
 import { LEAVE_REVIEW } from "../queries";
+import { useFavourites } from "../contexts/FavouritesContext";
+
 
 const GET_NOODLE_DETAILS = gql`
   query GetNoodleDetails($id: ID!) {
@@ -32,6 +34,7 @@ const GET_NOODLE_DETAILS = gql`
 
 export default function NoodlesDetails() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { addFavourite, removeFavourite, isFavourite } = useFavourites();
   
   const { loading, error, data } = useQuery(GET_NOODLE_DETAILS, {
     variables: { id },
@@ -73,7 +76,21 @@ export default function NoodlesDetails() {
       ]
     );
   };
-
+  const handleToggleFavourite = async () => {
+    if (!id) return;
+    
+    try {
+      if (isFavourite(id)) {
+        await removeFavourite(id);
+        Alert.alert("Removed", "Removed from favourites");
+      } else {
+        await addFavourite(id);
+        Alert.alert("Added", "Added to favourites!");
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to update favourites");
+    }
+  };
   if (loading) {
     return (
       <View style={styles.centered}>
@@ -91,6 +108,7 @@ export default function NoodlesDetails() {
   }
 
   const noodle = data.instantNoodle;
+  const isNoodleFavourite = id ? isFavourite(id) : false;
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -115,6 +133,29 @@ export default function NoodlesDetails() {
         <Text style={styles.tag}>
           📝 Reviews: {noodle.reviewsCount || 0}
         </Text>
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={[styles.reviewButton, reviewLoading && styles.reviewButtonDisabled]}
+          onPress={handleLeaveReview}
+          disabled={reviewLoading}
+        >
+          {reviewLoading ? (
+            <ActivityIndicator color="white" size="small" />
+          ) : (
+            <Text style={styles.reviewButtonText}>Leave Review</Text>
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.favouriteButton, isNoodleFavourite && styles.favouriteButtonActive]}
+          onPress={handleToggleFavourite}
+        >
+          <Text style={[styles.favouriteButtonText, isNoodleFavourite && styles.favouriteButtonTextActive]}>
+            {isNoodleFavourite ? "♥ Remove from Favourites" : "♡ Add to Favourites"}
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <TouchableOpacity
@@ -174,6 +215,11 @@ const styles = StyleSheet.create({
     marginRight: 8,
     marginBottom: 8,
   },
+
+  buttonContainer: {
+    gap: 12,
+    marginTop: 16,
+  },
   reviewButton: {
     backgroundColor: "#007AFF",
     paddingVertical: 12,
@@ -189,5 +235,25 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "600",
+  },
+  favouriteButton: {
+    backgroundColor: "white",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#ff4444",
+  },
+  favouriteButtonActive: {
+    backgroundColor: "#ff4444",
+  },
+  favouriteButtonText: {
+    color: "#ff4444",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  favouriteButtonTextActive: {
+    color: "white",
   },
 });
