@@ -5,6 +5,7 @@ import {
   select,
   relationship,
   timestamp,
+  virtual,
 } from '@keystone-6/core/fields';
 import { allowAll } from '@keystone-6/core/access';
 
@@ -63,6 +64,18 @@ export const lists = {
       }),
       createdAt: timestamp({
         defaultValue: { kind: 'now' },
+      }),
+      spicinessDescription: virtual({
+        field: graphql.field({
+          type: graphql.String,
+          resolve(item) {
+            const level = item.spicinessLevel;
+            if (level === 1 || level === 2) return 'Mild';
+            if (level === 3 || level === 4) return 'Medium';
+            if (level === 5) return 'Hot';
+            return 'Unknown';
+          },
+        }),
       }),
     },
   }),
