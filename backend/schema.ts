@@ -64,6 +64,10 @@ export const lists = {
       createdAt: timestamp({
         defaultValue: { kind: 'now' },
       }),
+      reviewsCount: integer({
+        defaultValue: 0,
+        ui: { description: 'Your Reviews Counts' },
+      }),
     },
   }),
 
