@@ -6,8 +6,9 @@ import {
   Image,
   ScrollView,
   StyleSheet,
+  Button,
 } from "react-native";
-import { gql, useQuery } from "@apollo/client";
+import { gql, useQuery, useMutation } from "@apollo/client";
 
 const GET_NOODLE_DETAILS = gql`
   query GetNoodleDetails($id: ID!) {
@@ -21,16 +22,62 @@ const GET_NOODLE_DETAILS = gql`
       imageURL
       category {
         name
+        __typename
       }
+      reviewsCount
+      __typename
     }
+  }
+`;
+
+const INCREMENT_REVIEW = gql`
+  mutation IncrementReview($id: ID!) {
+    incrementNoodleReview(id: $id)
   }
 `;
 
 export default function NoodlesDetails() {
   const { id } = useLocalSearchParams<{ id: string }>();
+
   const { loading, error, data } = useQuery(GET_NOODLE_DETAILS, {
     variables: { id },
     skip: !id,
+  });
+
+  const [incrementReview, { loading: mutationLoading }] = useMutation(INCREMENT_REVIEW, {
+    update(cache, { data: mutationData }) {
+      if (!mutationData) return;
+      const newCount = mutationData.incrementNoodleReview;
+      try {
+        const existingData: any = cache.readQuery({
+          query: GET_NOODLE_DETAILS,
+          variables: { id },
+        });
+        if (!existingData) return;
+
+        cache.writeQuery({
+          query: GET_NOODLE_DETAILS,
+          variables: { id },
+          data: {
+            instantNoodle: {
+              ...existingData.instantNoodle,
+              reviewsCount: newCount,
+            },
+          },
+        });
+      } catch (error) {
+        console.error("Cache update error:", error);
+      }
+    },
+    optimisticResponse: {
+      incrementNoodleReview: (data?.instantNoodle.reviewsCount ?? 0) + 1,
+    },
+    onError(error) {
+      console.error("Mutation error:", error);
+    },
+    onCompleted(data) {
+      console.log("Mutation completed:", data);
+    },
   });
 
   if (loading) {
@@ -50,6 +97,9 @@ export default function NoodlesDetails() {
   }
 
   const noodle = data.instantNoodle;
+
+  console.log("Current reviewsCount:", noodle.reviewsCount);
+  console.log("Noodle ID:", id);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -72,43 +122,37 @@ export default function NoodlesDetails() {
         <Text style={styles.tag}>⭐ {noodle.rating}/10</Text>
         <Text style={styles.tag}>📦 {noodle.category?.name}</Text>
       </View>
+
+      <View style={{ marginTop: 24 }}>
+        <Text style={{ fontSize: 18, marginBottom: 8 }}>
+          Reviews Count: {noodle.reviewsCount}
+        </Text>
+        <Button
+          title={mutationLoading ? "Submitting..." : "Leave Review"}
+          onPress={() => {
+            console.log("Leave Review clicked for id:", id);
+            if (id) incrementReview({ variables: { id } });
+          }}
+          disabled={mutationLoading || !id}
+        />
+      </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-    paddingBottom: 40,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorText: {
-    color: "red",
-  },
+  container: { padding: 16, paddingBottom: 40 },
+  centered: { flex: 1, justifyContent: "center", alignItems: "center" },
+  errorText: { color: "red" },
   image: {
     width: "100%",
     aspectRatio: 1,
     borderRadius: 12,
     marginBottom: 16,
   },
-  title: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 16,
-    marginBottom: 12,
-  },
-  tags: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
+  title: { fontSize: 22, fontWeight: "bold", marginBottom: 4 },
+  subtitle: { fontSize: 16, marginBottom: 12 },
+  tags: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   tag: {
     backgroundColor: "#ddd",
     paddingHorizontal: 10,
